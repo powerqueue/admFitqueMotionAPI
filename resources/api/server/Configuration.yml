@@ -1,10 +1,10 @@
 openapi: 3.0.1
 info:
   title: FitQue Login Service
-  description: All API endpoints to manage the fitque-login-api service
+  description: All API endpoints to manage the admFitqueMotionAPI service
   version: 1.0.0
 servers:
-  - url: /fitque-login-api/v1
+  - url: /admFitqueMotionAPI/v1
 
 tags:
   - name: FitQueue Login Service

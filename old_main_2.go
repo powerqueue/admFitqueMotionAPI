@@ -1,7 +1,7 @@
 package main
 
 // import (
-// 	"github.com/powerqueue/fitque-login-api/execute"
+// 	"github.com/powerqueue/admFitqueMotionAPI/execute"
 // )
 
 // func main() {

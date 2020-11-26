@@ -5,9 +5,9 @@ package execute
 // 	log2 "log"
 // 	"strings"
 
-// 	"github.com/powerqueue/fitque-login-api/models"
-// 	"github.com/powerqueue/fitque-login-api/routes"
-// 	"github.com/powerqueue/fitque-login-api/services"
+// 	"github.com/powerqueue/admFitqueMotionAPI/models"
+// 	"github.com/powerqueue/admFitqueMotionAPI/routes"
+// 	"github.com/powerqueue/admFitqueMotionAPI/services"
 
 // 	cobra "github.com/spf13/cobra"
 // 	v "github.com/spf13/viper"

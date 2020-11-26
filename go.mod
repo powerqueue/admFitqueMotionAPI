@@ -1,4 +1,4 @@
-module github.com/powerqueue/fitque-login-api
+module github.com/powerqueue/admFitqueMotionAPI
 
 go 1.12
 

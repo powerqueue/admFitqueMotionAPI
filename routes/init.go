@@ -6,7 +6,7 @@ package routes
 // 	"net/http"
 // 	"time"
 
-// 	"github.com/powerqueue/fitque-login-api/services"
+// 	"github.com/powerqueue/admFitqueMotionAPI/services"
 
 // 	"github.com/gobuffalo/packr/v2"
 // 	"github.com/gorilla/mux"

@@ -5,7 +5,7 @@ package services
 // 	"fmt"
 // 	"time"
 
-// 	"github.com/powerqueue/fitque-login-api/models"
+// 	"github.com/powerqueue/admFitqueMotionAPI/models"
 // )
 
 // //ILoginService - service interface

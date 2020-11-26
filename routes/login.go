@@ -5,7 +5,7 @@ package routes
 // 	"fmt"
 // 	"net/http"
 
-// 	"github.com/powerqueue/fitque-login-api/models"
+// 	"github.com/powerqueue/admFitqueMotionAPI/models"
 // )
 
 // //RetrieveLoginHandler - handler definition

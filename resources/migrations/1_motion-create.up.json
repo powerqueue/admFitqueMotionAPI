@@ -57,9 +57,12 @@
     "indexes": [
       {
         "key": {
-          "ID": 1
+          "LocationID": 1,
+          "SensorID": 1,
+          "MotionStartDt": 1,
+          "MotionEndDt": 1
         },
-        "name": "PK_ID",
+        "name": "PK_LocationSensorTimeID",
         "unique": true
       }
     ],
