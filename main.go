@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/powerqueue/fitque-login-api/models"
@@ -48,11 +47,10 @@ func main() {
 	// r.DELETE("/todo/:id", DeleteTodoHandler)
 	// r.PUT("/todo", CompleteTodoHandler)
 
-	v1 := r.Group("/fitqueue-login-api/v1")
+	v1 := r.Group("/fitqueue-motion-api/v1")
 	{
-		v1.POST("/retrieve-login", RetrieveLoginHandler)
-		v1.POST("/create-login", CreateLogin)
-		v1.POST("/term-login", TermLogin)
+		v1.POST("/retrieve-motion", RetrieveMotionHandler)
+		v1.POST("/create-motion", CreateMotion)
 	}
 
 	// authorized := r.Group("/")
@@ -63,7 +61,7 @@ func main() {
 	// authorized.DELETE("/case/:caseCode", TermCaseHandler)
 	// authorized.PUT("/case", UpdateCaseHandler)
 
-	err := r.Run(":3001")
+	err := r.Run(":3101")
 	if err != nil {
 		panic(err)
 	}
@@ -90,28 +88,28 @@ func terminateWithError(statusCode int, message string, c *gin.Context) {
 	c.Abort()
 }
 
-func convertHTTPBodyToLoginDefinition(httpBody io.ReadCloser) (models.LoginDefinition, int, error) {
+func convertHTTPBodyToMotionDefinition(httpBody io.ReadCloser) (models.MotionDefinition, int, error) {
 	body, err := ioutil.ReadAll(httpBody)
 	if err != nil {
-		return models.LoginDefinition{}, http.StatusInternalServerError, err
+		return models.MotionDefinition{}, http.StatusInternalServerError, err
 	}
 	defer httpBody.Close()
-	return convertJSONBodyToLoginDefinition(body)
+	return convertJSONBodyToMotionDefinition(body)
 }
 
-func convertJSONBodyToLoginDefinition(jsonBody []byte) (models.LoginDefinition, int, error) {
-	var login models.LoginDefinition
-	err := json.Unmarshal(jsonBody, &login)
+func convertJSONBodyToMotionDefinition(jsonBody []byte) (models.MotionDefinition, int, error) {
+	var motion models.MotionDefinition
+	err := json.Unmarshal(jsonBody, &motion)
 	if err != nil {
-		return models.LoginDefinition{}, http.StatusBadRequest, err
+		return models.MotionDefinition{}, http.StatusBadRequest, err
 	}
-	return login, http.StatusOK, nil
+	return motion, http.StatusOK, nil
 }
 
-//RetrieveLoginHandler - handler definition
-func RetrieveLoginHandler(c *gin.Context) {
-	fmt.Println("Inside CreateLogin Route Handler")
-	login, statusCode, err := convertHTTPBodyToLoginDefinition(c.Request.Body)
+//RetrieveMotionHandler - handler definition
+func RetrieveMotionHandler(c *gin.Context) {
+	fmt.Println("Inside RetrieveMotionHandler Route Handler")
+	motion, statusCode, err := convertHTTPBodyToMotionDefinition(c.Request.Body)
 	if err != nil {
 		c.JSON(statusCode, err)
 		return
@@ -136,17 +134,17 @@ func RetrieveLoginHandler(c *gin.Context) {
 
 	fmt.Println("Connected to MongoDB!")
 
-	collection := client.Database("fitque-db").Collection("login")
+	collection := client.Database("fitque-db").Collection("motion")
 
 	// create a value into which the result can be decoded
-	filter := bson.D{{"MemberID", login.MemberID}, {"LocationID", login.LocationID}, {"UserName", login.UserName}, {"EfctvStartDt", login.EfctvStartDt}}
+	filter := bson.D{{"LocationID", motion.LocationID}, {"SensorID", motion.SensorID}, {"MotionStartDt", motion.MotionStartDt}}
 
-	err = collection.FindOne(context.TODO(), filter).Decode(&login)
+	err = collection.FindOne(context.TODO(), filter).Decode(&motion)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Found a single document: %+v\n", login)
+	fmt.Printf("Found a single document: %+v\n", motion)
 
 	err = client.Disconnect(context.TODO())
 
@@ -155,32 +153,22 @@ func RetrieveLoginHandler(c *gin.Context) {
 	}
 	fmt.Println("Connection to MongoDB closed.")
 
-	c.JSON(statusCode, login)
+	c.JSON(statusCode, motion)
 }
 
-//CreateLogin - handler method definition
-func CreateLogin(c *gin.Context) {
-	fmt.Println("Inside CreateLogin Route Handler")
-	login, statusCode, err := convertHTTPBodyToLoginDefinition(c.Request.Body)
+//CreateMotion - handler method definition
+func CreateMotion(c *gin.Context) {
+	fmt.Println("Inside CreateMotion Route Handler")
+	motion, statusCode, err := convertHTTPBodyToMotionDefinition(c.Request.Body)
 	if err != nil {
 		c.JSON(statusCode, err)
 		return
 	}
 
-	fmt.Println("Inside CreateLogin Model Function")
-	now := time.Now()
-	login.ID = primitive.NewObjectID()
-	login.MemberID = strings.ToUpper(login.MemberID)
-
-	if login.UserName == "" {
-		login.UserName = "anonymous"
-	} else {
-		login.UserName = login.UserName
-	}
-
-	login.EfctvStartDt = &now
-
-	login.EfctvEndDt = &time.Time{}
+	fmt.Println("Inside CreateMotion Model Function")
+	motion.ID = primitive.NewObjectID()
+	motion.LocationID = strings.ToUpper(motion.LocationID)
+	motion.SensorID = strings.ToUpper(motion.SensorID)
 
 	// Set client options
 	clientOptions := options.Client().ApplyURI("mongodb://ln004prd:27017")
@@ -203,7 +191,7 @@ func CreateLogin(c *gin.Context) {
 
 	fmt.Println("Connected to MongoDB!")
 
-	collection := client.Database("fitqueue-db").Collection("login")
+	collection := client.Database("fitqueue-db").Collection("motion")
 
 	//Insert SINGLE here
 	// insertResult, err := collection.InsertOne(context.TODO(), ash)
@@ -214,9 +202,9 @@ func CreateLogin(c *gin.Context) {
 	// fmt.Println("Inserted a single document: ", insertResult.InsertedID)
 
 	//Insert MULTIPLE here
-	trainers := []interface{}{login}
+	motions := []interface{}{motion}
 
-	insertManyResult, err := collection.InsertMany(context.TODO(), trainers)
+	insertManyResult, err := collection.InsertMany(context.TODO(), motions)
 	if err != nil {
 		// log.Fatal(err)
 		fmt.Println("Error create %s", err)
@@ -233,7 +221,7 @@ func CreateLogin(c *gin.Context) {
 	}
 	fmt.Println("Connection to MongoDB closed.")
 
-	bytes, err := json.Marshal(login)
+	bytes, err := json.Marshal(motion)
 	if err != nil {
 		// log.Fatal(err)
 		fmt.Println("Error create %s", err)
@@ -246,93 +234,5 @@ func CreateLogin(c *gin.Context) {
 	// w.WriteHeader(http.StatusOK)
 	// fmt.Fprintf(w, "Category: %v\n", loginDef)
 
-	c.JSON(statusCode, login)
-}
-
-//TermLogin - handler method definition
-func TermLogin(c *gin.Context) {
-	fmt.Println("Inside CreateLogin Route Handler")
-	login, statusCode, err := convertHTTPBodyToLoginDefinition(c.Request.Body)
-	if err != nil {
-		c.JSON(statusCode, err)
-		return
-	}
-
-	fmt.Println("Inside TermLogin Model Function")
-	now := time.Now()
-	login.ID = primitive.NewObjectID()
-	login.MemberID = strings.ToUpper(login.MemberID)
-
-	if login.UserName == "" {
-		login.UserName = "anonymous"
-	}
-
-	login.EfctvEndDt = &now
-
-	// Set client options
-	clientOptions := options.Client().ApplyURI("mongodb://ln004prd:27017")
-
-	// Connect to MongoDB
-	client, err := mongo.Connect(context.TODO(), clientOptions)
-
-	if err != nil {
-		// log.Fatal(err)
-		fmt.Println("Error term %s", err)
-	}
-
-	// Check the connection
-	err = client.Ping(context.TODO(), nil)
-
-	if err != nil {
-		// log.Fatal(err)
-		fmt.Println("Error term %s", err)
-	}
-
-	fmt.Println("Connected to MongoDB!")
-
-	collection := client.Database("fitqueue-db").Collection("login")
-
-	//build filter
-	filter := bson.D{{"LoginID", login.LoginID}, {"MemberID", login.MemberID}, {"LocationID", login.LocationID}, {"UserName", login.UserName}}
-
-	// update := bson.D{
-	// 	{"$inc", bson.D{
-	// 		{"EfctvEndDt", Login.EfctvEndDt},
-	// 	}},
-	// }
-
-	update := bson.D{
-		{"$set", bson.D{
-			{"EfctvEndDt", login.EfctvEndDt},
-		}},
-	}
-
-	// update := bson.M{"EfctvEndDt": primitive.Timestamp{T: uint32(time.Now().Unix())}}
-
-	//update/term based on filter
-	updateResult, err := collection.UpdateOne(context.TODO(), filter, update)
-	if err != nil {
-		// log.Fatal(err)
-		fmt.Println("Error term %s", err)
-	} else {
-		fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
-	}
-
-	//disconnect client
-	err = client.Disconnect(context.TODO())
-
-	if err != nil {
-		// log.Fatal(err)
-		fmt.Println("Error term %s", err)
-	}
-	fmt.Println("Connection to MongoDB closed.")
-
-	bytes, err := json.Marshal(login)
-	if err != nil {
-		c.JSON(statusCode, login)
-
-	}
-
-	fmt.Println(string(bytes))
-	c.JSON(statusCode, login)
+	c.JSON(statusCode, motion)
 }

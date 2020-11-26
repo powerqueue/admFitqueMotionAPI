@@ -1,0 +1,68 @@
+[
+  {
+    "create": "motion",
+    "validator": {
+      "$jsonSchema": {
+        "bsonType": "object",
+        "required": [
+          "LocationID",
+          "SensorID",
+          "MotionStartDt",
+          "MotionEndDt"
+        ],
+        "properties": {
+          "LocationID": {
+            "bsonType": "string"
+          },
+          "SensorID": {
+            "bsonType": "string"
+          },
+          "MotionStartDt": {
+            "bsonType": "date"
+          },
+          "MotionEndDt": {
+            "bsonType": "date"
+          },
+          "Measurements": {
+            "bsonType": [
+              "array"
+            ],
+            "minItems": 1,
+            "items": {
+              "bsonType": [
+                "object"
+              ],
+              "required": [
+                "Report",
+                "ReportDt"
+              ],
+              "additionalProperties": false,
+              "description": "'items' must contain the stated fields.",
+              "properties": {
+                "Report": {
+                  "bsonType": "string"
+                },
+                "ReportDt": {
+                  "bsonType": "date"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "createIndexes": "motion",
+    "indexes": [
+      {
+        "key": {
+          "ID": 1
+        },
+        "name": "PK_ID",
+        "unique": true
+      }
+    ],
+    "writeConcern": {}
+  }
+]
